@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
-import { X, Loader2, MapPin, Wrench, Clock, DollarSign, CreditCard } from 'lucide-react';
+import { X, Loader2, MapPin, Wrench, Clock, DollarSign } from 'lucide-react';
 import { Alert } from './Alert';
 import type { Provider } from '../types';
 import type { UrgenciaOption, MetodoPagoOption } from '../types/request';
-import { saveRequest } from '../lib/requests';
-import { getUser } from '../lib/auth';
+import { createRequest } from '../data/api';
 
 interface RequestModalProps {
   provider: Provider;
@@ -72,43 +71,36 @@ export const RequestModal = ({ provider, isOpen, onClose, onSuccess, defaultZona
     // Simulate network delay
     await new Promise(resolve => setTimeout(resolve, 1200));
 
-    const user = getUser();
-    if (!user) {
-      setError('Error: usuario no encontrado');
+    try {
+      await createRequest({
+        providerId: provider.id,
+        providerName: provider.name,
+        providerService: provider.service,
+        providerZona: provider.zona,
+        zona,
+        urgencia,
+        descripcion,
+        direccion,
+        referencias,
+        metodoPago,
+      });
+      
       setIsLoading(false);
-      return;
+      
+      // Reset form
+      setZona(defaultZona);
+      setUrgencia('Entre 24 y 48 hs');
+      setDescripcion('');
+      setDireccion('');
+      setReferencias('');
+      setMetodoPago('Indiferente');
+      
+      onSuccess();
+      onClose();
+    } catch (error: any) {
+      setError(error.message || 'Error al crear la solicitud');
+      setIsLoading(false);
     }
-
-    const request = {
-      id: `req_${Date.now()}`,
-      providerId: provider.id.toString(),
-      providerName: provider.name,
-      providerService: provider.service,
-      providerZona: provider.zona,
-      zona,
-      urgencia,
-      descripcion,
-      direccion,
-      referencias,
-      metodoPago,
-      estado: 'Pendiente' as const,
-      fecha: new Date().toISOString(),
-      userEmail: user.email,
-    };
-
-    saveRequest(request);
-    setIsLoading(false);
-    
-    // Reset form
-    setZona(defaultZona);
-    setUrgencia('Entre 24 y 48 hs');
-    setDescripcion('');
-    setDireccion('');
-    setReferencias('');
-    setMetodoPago('Indiferente');
-    
-    onSuccess();
-    onClose();
   };
 
   const handleClose = () => {

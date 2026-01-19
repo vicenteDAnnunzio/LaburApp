@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Wrench, Mail, Lock, User, Loader2 } from 'lucide-react';
-import { login, register } from '../lib/auth';
-import type { ProviderProfile } from '../lib/auth';
+import { login, register } from '../data/api';
+import type { RegisterData } from '../data/api';
 import { validateEmail, validatePassword, validateRequired, validatePasswordMatch } from '../lib/validation';
 import { Alert } from '../components/Alert';
 import { InputField } from '../components/InputField';
@@ -69,10 +69,12 @@ export const Login = () => {
     // Simulate network delay
     await new Promise(resolve => setTimeout(resolve, 800));
 
-    if (login(loginEmail, loginPassword)) {
+    const result = await login({ email: loginEmail, password: loginPassword });
+    
+    if (result.success) {
       navigate('/home');
     } else {
-      setError('Email o contraseña incorrectos');
+      setError(result.message || 'Email o contraseña incorrectos');
       setIsLoading(false);
     }
   };
@@ -131,23 +133,30 @@ export const Login = () => {
     // Simulate network delay
     await new Promise(resolve => setTimeout(resolve, 800));
 
-    const providerProfile: Partial<ProviderProfile> | undefined = registerRole === 'provider'
-      ? {
-          zona: providerZona,
-          servicios: providerServicios,
-          experiencia: parseInt(providerExperiencia),
-          descripcion: providerDescripcion,
-          telefono: providerTelefono,
-          disponible: true,
-          disponibilidad: 'Entre 24 y 48 hs',
-          perfilActivo: true,
-        }
-      : undefined;
+    const registerData: RegisterData = {
+      name: registerName,
+      email: registerEmail,
+      password: registerPassword,
+      role: registerRole,
+      providerProfile: registerRole === 'provider'
+        ? {
+            zona: providerZona,
+            servicios: providerServicios,
+            experiencia: parseInt(providerExperiencia),
+            descripcion: providerDescripcion,
+            telefono: providerTelefono,
+            disponibilidad: 'Entre 24 y 48 hs',
+            perfilActivo: true,
+          }
+        : undefined,
+    };
 
-    if (register(registerName, registerEmail, registerPassword, registerRole, providerProfile)) {
+    const result = await register(registerData);
+    
+    if (result.success) {
       navigate('/home');
     } else {
-      setError('Error al crear la cuenta');
+      setError(result.message || 'Error al crear la cuenta');
       setIsLoading(false);
     }
   };

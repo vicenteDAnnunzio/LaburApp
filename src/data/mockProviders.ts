@@ -2,7 +2,7 @@ import type { Provider } from '../types';
 
 export const mockProviders: Provider[] = [
   {
-    id: 1,
+    id: '1',
     name: 'Carlos Méndez',
     service: 'Plomero',
     zona: 'Palermo',
@@ -10,7 +10,7 @@ export const mockProviders: Provider[] = [
     available: true,
   },
   {
-    id: 2,
+    id: '2',
     name: 'Ana Rodríguez',
     service: 'Electricista',
     zona: 'Recoleta',
@@ -18,7 +18,7 @@ export const mockProviders: Provider[] = [
     available: true,
   },
   {
-    id: 3,
+    id: '3',
     name: 'Juan Pérez',
     service: 'Gasista',
     zona: 'Belgrano',
@@ -26,7 +26,7 @@ export const mockProviders: Provider[] = [
     available: false,
   },
   {
-    id: 4,
+    id: '4',
     name: 'María González',
     service: 'Jardinero',
     zona: 'Palermo',
@@ -34,7 +34,7 @@ export const mockProviders: Provider[] = [
     available: true,
   },
   {
-    id: 5,
+    id: '5',
     name: 'Roberto Sánchez',
     service: 'Pintor',
     zona: 'Caballito',
@@ -42,7 +42,7 @@ export const mockProviders: Provider[] = [
     available: true,
   },
   {
-    id: 6,
+    id: '6',
     name: 'Laura Fernández',
     service: 'Plomero',
     zona: 'Almagro',
@@ -50,7 +50,7 @@ export const mockProviders: Provider[] = [
     available: true,
   },
   {
-    id: 7,
+    id: '7',
     name: 'Diego Martínez',
     service: 'Electricista',
     zona: 'Palermo',
@@ -58,7 +58,7 @@ export const mockProviders: Provider[] = [
     available: true,
   },
   {
-    id: 8,
+    id: '8',
     name: 'Sofía López',
     service: 'Carpintero',
     zona: 'Flores',
@@ -66,7 +66,7 @@ export const mockProviders: Provider[] = [
     available: false,
   },
   {
-    id: 9,
+    id: '9',
     name: 'Martín Torres',
     service: 'Cerrajero',
     zona: 'Villa Urquiza',
@@ -74,7 +74,7 @@ export const mockProviders: Provider[] = [
     available: true,
   },
   {
-    id: 10,
+    id: '10',
     name: 'Gabriela Romero',
     service: 'Plomero',
     zona: 'San Telmo',

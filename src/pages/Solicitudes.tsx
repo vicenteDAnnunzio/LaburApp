@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FileText, Clock, CheckCircle2, XCircle, Wrench, MapPin, Calendar, DollarSign, ArrowLeft, X, AlertTriangle } from 'lucide-react';
-import { getUserRequests, updateRequestStatus } from '../lib/requests';
-import { getUser } from '../lib/auth';
+import { listRequests, updateRequest } from '../data/api';
 import { Header } from '../components/Header';
 import type { ServiceRequest } from '../types/request';
 
@@ -13,15 +12,10 @@ export const Solicitudes = () => {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [requestToCancel, setRequestToCancel] = useState<string | null>(null);
 
-  const loadRequests = () => {
+  const loadRequests = async () => {
     try {
-      const user = getUser();
-      if (user) {
-        const userRequests = getUserRequests(user.email);
-        // Ordenar de más nueva a más vieja
-        const sortedRequests = userRequests.sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
-        setRequests(sortedRequests);
-      }
+      const userRequests = await listRequests('client');
+      setRequests(userRequests);
     } catch (error) {
       console.error('Error loading requests:', error);
       setRequests([]);
@@ -37,12 +31,16 @@ export const Solicitudes = () => {
     setShowCancelModal(true);
   };
 
-  const confirmCancel = () => {
+  const confirmCancel = async () => {
     if (requestToCancel) {
-      updateRequestStatus(requestToCancel, 'Cancelada');
-      loadRequests();
-      setShowCancelModal(false);
-      setRequestToCancel(null);
+      try {
+        await updateRequest(requestToCancel, { action: 'cancel' });
+        await loadRequests();
+        setShowCancelModal(false);
+        setRequestToCancel(null);
+      } catch (error) {
+        console.error('Error canceling request:', error);
+      }
     }
   };
 

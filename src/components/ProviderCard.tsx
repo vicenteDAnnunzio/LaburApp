@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { MapPin, Briefcase, Clock } from 'lucide-react';
 import type { Provider } from '../types';
 import { RequestModal } from './RequestModal';
-import { Alert } from './Alert';
 
 interface ProviderCardProps {
   provider: Provider;

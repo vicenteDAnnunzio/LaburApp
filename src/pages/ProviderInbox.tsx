@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Inbox, Clock, CheckCircle2, XCircle, Wrench, MapPin, Calendar, DollarSign, ArrowLeft, MessageCircle, User } from 'lucide-react';
-import { getProviderRequests, updateRequestStatus } from '../lib/requests';
-import { getUser } from '../lib/auth';
+import { listRequests, updateRequest, getMe } from '../data/api';
 import { Header } from '../components/Header';
 import type { ServiceRequest } from '../types/request';
 
@@ -12,25 +11,34 @@ export const ProviderInbox = () => {
   const [filter, setFilter] = useState<'todas' | 'pendientes' | 'aceptadas' | 'rechazadas'>('todas');
   const [showMessageModal, setShowMessageModal] = useState(false);
 
-  const loadRequests = () => {
-    const user = getUser();
-    if (user && user.role === 'provider') {
-      const providerRequests = getProviderRequests(user.id);
-      // Sort by date descending (newest first)
-      const sortedRequests = providerRequests.sort((a, b) => 
-        new Date(b.fecha).getTime() - new Date(a.fecha).getTime()
-      );
-      setRequests(sortedRequests);
+  const loadRequests = async () => {
+    try {
+      const user = await getMe();
+      if (user && user.role === 'provider') {
+        const providerRequests = await listRequests('provider');
+        setRequests(providerRequests);
+      }
+    } catch (error) {
+      console.error('Error loading requests:', error);
+      setRequests([]);
     }
   };
 
   useEffect(() => {
-    const user = getUser();
-    if (!user || user.role !== 'provider') {
-      navigate('/home');
-      return;
-    }
-    loadRequests();
+    const checkAccess = async () => {
+      try {
+        const user = await getMe();
+        if (!user || user.role !== 'provider') {
+          navigate('/home');
+          return;
+        }
+        loadRequests();
+      } catch (error) {
+        navigate('/home');
+      }
+    };
+    
+    checkAccess();
   }, [navigate]);
 
   const filteredRequests = filter === 'todas' 
@@ -42,14 +50,22 @@ export const ProviderInbox = () => {
         return true;
       });
 
-  const handleAccept = (requestId: string) => {
-    updateRequestStatus(requestId, 'Aceptada');
-    loadRequests();
+  const handleAccept = async (requestId: string) => {
+    try {
+      await updateRequest(requestId, { action: 'accept' });
+      await loadRequests();
+    } catch (error) {
+      console.error('Error accepting request:', error);
+    }
   };
 
-  const handleReject = (requestId: string) => {
-    updateRequestStatus(requestId, 'Rechazada');
-    loadRequests();
+  const handleReject = async (requestId: string) => {
+    try {
+      await updateRequest(requestId, { action: 'reject' });
+      await loadRequests();
+    } catch (error) {
+      console.error('Error rejecting request:', error);
+    }
   };
 
   const getStatusIcon = (estado: ServiceRequest['estado']) => {

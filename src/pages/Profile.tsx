@@ -6,8 +6,8 @@ import { Alert } from '../components/Alert';
 import { Toggle } from '../components/Toggle';
 import { SectionHeading } from '../components/SectionHeading';
 import { User, Mail, Camera, Loader2, Lock, LogOut, ArrowLeft } from 'lucide-react';
-import { getUser, updateUser, getProviderProfile, updateProviderProfile, clearSession } from '../lib/auth';
-import type { User as UserType, ProviderProfile } from '../lib/auth';
+import { getMe, updateMe, updateProviderProfile, logout } from '../data/api';
+import type { UserWithProfile } from '../data/api';
 import { validateRequired, validatePassword } from '../lib/validation';
 
 const ZONAS = ['Palermo', 'Recoleta', 'Belgrano', 'Caballito', 'Almagro', 'Flores', 'Villa Urquiza', 'San Telmo', 'Microcentro', 'Núñez'];
@@ -18,7 +18,7 @@ const PRESET_AVATARS = ['👤', '👨', '👩', '🧑', '👨‍💼', '👩‍�
 
 export const Profile = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState<UserType | null>(null);
+  const [user, setUser] = useState<UserWithProfile | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState('');
   const [showSuccess, setShowSuccess] = useState(false);
@@ -47,16 +47,16 @@ export const Profile = () => {
   const [perfilActivo, setPerfilActivo] = useState(true);
 
   useEffect(() => {
-    const currentUser = getUser();
-    if (currentUser) {
-      setUser(currentUser);
-      setName(currentUser.name);
-      setEmail(currentUser.email);
-      setAvatar(currentUser.avatar || '👤');
+    const loadUserData = async () => {
+      try {
+        const currentUser = await getMe();
+        setUser(currentUser);
+        setName(currentUser.name);
+        setEmail(currentUser.email);
+        setAvatar(currentUser.avatar || '👤');
 
-      if (currentUser.role === 'provider') {
-        const profile = getProviderProfile();
-        if (profile) {
+        if (currentUser.role === 'provider' && currentUser.providerProfile) {
+          const profile = currentUser.providerProfile;
           setZona(profile.zona);
           setServicios(profile.servicios);
           setExperiencia(profile.experiencia.toString());
@@ -65,8 +65,12 @@ export const Profile = () => {
           setDisponibilidad(profile.disponibilidad || 'Disponible hoy');
           setPerfilActivo(profile.perfilActivo ?? true);
         }
+      } catch (error) {
+        console.error('Error loading user data:', error);
       }
-    }
+    };
+    
+    loadUserData();
   }, []);
 
   const toggleServicio = (servicio: string) => {
@@ -110,45 +114,47 @@ export const Profile = () => {
     // Simulate network delay
     await new Promise(resolve => setTimeout(resolve, 600));
 
-    // Update user
-    if (user) {
-      const updatedUser: UserType = {
-        ...user,
-        name,
-        email,
-        avatar,
-      };
-      updateUser(updatedUser);
-      setUser(updatedUser);
-      
-      // Update last modified
-      localStorage.setItem('sf_lastModified', new Date().toISOString());
-    }
+    try {
+      // Update user
+      if (user) {
+        const updatedUser = await updateMe({
+          name,
+          avatar,
+        });
+        
+        setUser({ ...user, ...updatedUser });
+        
+        // Update last modified
+        localStorage.setItem('sf_lastModified', new Date().toISOString());
+      }
 
-    // Update provider profile
-    if (user?.role === 'provider') {
-      const updatedProfile: ProviderProfile = {
-        userId: user.id,
-        zona,
-        servicios,
-        experiencia: parseInt(experiencia),
-        descripcion,
-        telefono,
-        disponibilidad,
-        perfilActivo,
-        disponible: perfilActivo, // Keep backward compatibility
-      };
-      updateProviderProfile(updatedProfile);
+      // Update provider profile
+      if (user?.role === 'provider') {
+        const updatedProfile = await updateProviderProfile({
+          zona,
+          servicios,
+          experiencia: parseInt(experiencia),
+          descripcion,
+          telefono,
+          disponibilidad,
+          perfilActivo,
+        });
+        
+        setUser(prev => prev ? { ...prev, providerProfile: updatedProfile } : prev);
+      }
+      
+      setShowSuccess(true);
+      
+      // Force UserMenu to re-render by triggering a custom event
+      window.dispatchEvent(new Event('userUpdated'));
+      
+      // Auto-hide success toast after 4 seconds
+      setTimeout(() => setShowSuccess(false), 4000);
+    } catch (error: any) {
+      setError(error.message || 'Error al guardar los cambios');
+    } finally {
+      setIsLoading(false);
     }
-    
-    setShowSuccess(true);
-    setIsLoading(false);
-    
-    // Force UserMenu to re-render by triggering a custom event
-    window.dispatchEvent(new Event('userUpdated'));
-    
-    // Auto-hide success toast after 4 seconds
-    setTimeout(() => setShowSuccess(false), 4000);
   };
 
   const handlePasswordChange = async () => {
@@ -184,8 +190,8 @@ export const Profile = () => {
     setTimeout(() => setSuccess(''), 3000);
   };
 
-  const handleLogout = () => {
-    clearSession();
+  const handleLogout = async () => {
+    await logout();
     navigate('/login');
   };
 

@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import { Header } from '../components/Header';
 import { SearchSection } from '../components/SearchSection';
 import { ProviderCard } from '../components/ProviderCard';
-import { mockProviders } from '../data/mockProviders';
+import { listProviders } from '../data/api';
 import { Users } from 'lucide-react';
 import type { Provider } from '../types';
 
@@ -13,16 +13,20 @@ export const Home = () => {
   const [hasSearched, setHasSearched] = useState(false);
   const resultsRef = useRef<HTMLDivElement>(null);
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
     setHasSearched(true);
     
-    const results = mockProviders.filter((provider) => {
-      const zonaMatch = !selectedZona || provider.zona === selectedZona;
-      const serviceMatch = !selectedService || provider.service === selectedService;
-      return zonaMatch && serviceMatch;
-    });
+    try {
+      const results = await listProviders({
+        zona: selectedZona || undefined,
+        servicio: selectedService || undefined,
+      });
 
-    setFilteredProviders(results);
+      setFilteredProviders(results);
+    } catch (error) {
+      console.error('Error loading providers:', error);
+      setFilteredProviders([]);
+    }
 
     // Scroll suave a los resultados con delay
     setTimeout(() => {

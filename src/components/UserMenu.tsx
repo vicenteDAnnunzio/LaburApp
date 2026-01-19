@@ -1,15 +1,16 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronDown, User, Settings, LogOut, FileText, Inbox } from 'lucide-react';
-import { clearSession, getCurrentUserName, getUser } from '../lib/auth';
+import { logout } from '../data/api';
+import { getUserData } from '../lib/session';
 
 export const UserMenu = () => {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  const [userName, setUserName] = useState(getCurrentUserName());
-  const [userAvatar, setUserAvatar] = useState(getUser()?.avatar || '👤');
-  const [isProvider, setIsProvider] = useState(getUser()?.role === 'provider');
+  const [userName, setUserName] = useState(getUserData()?.name || '');
+  const [userAvatar, setUserAvatar] = useState(getUserData()?.avatar || '👤');
+  const [isProvider, setIsProvider] = useState(getUserData()?.role === 'provider');
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -19,14 +20,16 @@ export const UserMenu = () => {
     };
 
     const handleStorageChange = () => {
-      setUserName(getCurrentUserName());
-      setUserAvatar(getUser()?.avatar || '👤');
+      const user = getUserData();
+      setUserName(user?.name || '');
+      setUserAvatar(user?.avatar || '👤');
     };
 
     const handleUserUpdate = () => {
-      setUserName(getCurrentUserName());
-      setUserAvatar(getUser()?.avatar || '👤');
-      setIsProvider(getUser()?.role === 'provider');
+      const user = getUserData();
+      setUserName(user?.name || '');
+      setUserAvatar(user?.avatar || '👤');
+      setIsProvider(user?.role === 'provider');
     };
 
     document.addEventListener('mousedown', handleClickOutside);
@@ -40,8 +43,8 @@ export const UserMenu = () => {
     };
   }, []);
 
-  const handleLogout = () => {
-    clearSession();
+  const handleLogout = async () => {
+    await logout();
     navigate('/login');
   };
 

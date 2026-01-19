@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Shield, Clock, Star, MapPin, Wrench, Zap, AlertCircle } from 'lucide-react';
+import { Search, Shield, Star, MapPin, Wrench, Zap, AlertCircle } from 'lucide-react';
 import type { Zona, Service } from '../types';
 
 interface SearchSectionProps {
