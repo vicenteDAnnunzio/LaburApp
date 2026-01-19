@@ -7,6 +7,7 @@ import { Settings } from './pages/Settings';
 import { Solicitudes } from './pages/Solicitudes';
 import { ProviderInbox } from './pages/ProviderInbox';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { seedDemoData } from './lib/auth';
 import { seedDemoRequests } from './lib/requests';
 
@@ -21,11 +22,13 @@ function App() {
   }, []);
 
   return (
-    <BrowserRouter>
+    <ErrorBoundary>
+      <BrowserRouter>
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/" element={<Navigate to="/login" replace />} />
         <Route
-          path="/"
+          path="/home"
           element={
             <ProtectedRoute>
               <Home />
@@ -64,9 +67,10 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>
+    </ErrorBoundary>
   );
 }
 

@@ -9,13 +9,41 @@ export function saveRequest(request: ServiceRequest): void {
 }
 
 export function getRequests(): ServiceRequest[] {
-  const data = localStorage.getItem(REQUESTS_KEY);
-  return data ? JSON.parse(data) : [];
+  try {
+    const data = localStorage.getItem(REQUESTS_KEY);
+    if (!data) return [];
+    
+    const requests = JSON.parse(data) as any[];
+    
+    // Migrar requests antiguos que no tienen metodoPago
+    const migratedRequests = requests.map(req => {
+      if (!req.metodoPago) {
+        return {
+          ...req,
+          metodoPago: 'Indiferente',
+          direccion: req.direccion || 'No especificada'
+        };
+      }
+      return req;
+    });
+    
+    return migratedRequests as ServiceRequest[];
+  } catch (error) {
+    console.error('Error loading requests:', error);
+    // Si hay un error, limpiar el localStorage corrupto
+    localStorage.removeItem(REQUESTS_KEY);
+    return [];
+  }
 }
 
 export function getUserRequests(userEmail: string): ServiceRequest[] {
-  const requests = getRequests();
-  return requests.filter(req => req.userEmail === userEmail);
+  try {
+    const requests = getRequests();
+    return requests.filter(req => req.userEmail === userEmail);
+  } catch (error) {
+    console.error('Error getting user requests:', error);
+    return [];
+  }
 }
 
 export function updateRequestStatus(requestId: string, estado: ServiceRequest['estado']): void {
@@ -28,8 +56,13 @@ export function updateRequestStatus(requestId: string, estado: ServiceRequest['e
 }
 
 export function getProviderRequests(providerId: string): ServiceRequest[] {
-  const requests = getRequests();
-  return requests.filter(req => req.providerId === providerId);
+  try {
+    const requests = getRequests();
+    return requests.filter(req => req.providerId === providerId);
+  } catch (error) {
+    console.error('Error getting provider requests:', error);
+    return [];
+  }
 }
 
 // Seed demo requests for provider
@@ -53,7 +86,7 @@ export function seedDemoRequests(providerId: string): void {
       descripcion: 'Pérdida de agua en el baño. Necesito que vengan urgente.',
       direccion: 'Thames 1234, Piso 3, Depto B',
       referencias: 'Edificio de ladrillo, portón verde',
-      contactoPreferido: 'Teléfono',
+      metodoPago: 'Efectivo',
       estado: 'Pendiente',
       fecha: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
       userEmail: 'cliente1@mail.com'
@@ -67,7 +100,8 @@ export function seedDemoRequests(providerId: string): void {
       zona: 'Palermo',
       urgencia: 'Entre 24 y 48 hs',
       descripcion: 'Revisión de instalación de gas y certificado',
-      contactoPreferido: 'Email',
+      direccion: 'Arenales 1500',
+      metodoPago: 'Transferencia',
       estado: 'Pendiente',
       fecha: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(), // 5 hours ago
       userEmail: 'cliente2@mail.com'
@@ -82,7 +116,7 @@ export function seedDemoRequests(providerId: string): void {
       urgencia: 'Esta semana',
       descripcion: 'Instalación de termotanque nuevo',
       direccion: 'Av. Santa Fe 2500',
-      contactoPreferido: 'Teléfono',
+      metodoPago: 'Indiferente',
       estado: 'Aceptada',
       fecha: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
       userEmail: 'cliente3@mail.com'

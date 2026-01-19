@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { X, Loader2, MapPin, Wrench, Clock, DollarSign } from 'lucide-react';
+import { X, Loader2, MapPin, Wrench, Clock, DollarSign, CreditCard } from 'lucide-react';
 import { Alert } from './Alert';
 import type { Provider } from '../types';
-import type { UrgenciaOption, ContactoOption } from '../types/request';
+import type { UrgenciaOption, MetodoPagoOption } from '../types/request';
 import { saveRequest } from '../lib/requests';
 import { getUser } from '../lib/auth';
 
@@ -21,7 +21,7 @@ const URGENCIA_OPTIONS: UrgenciaOption[] = [
   'Entre 48 y 72 hs',
   'Esta semana'
 ];
-const CONTACTO_OPTIONS: ContactoOption[] = ['Email', 'Teléfono'];
+const METODO_PAGO_OPTIONS: MetodoPagoOption[] = ['Transferencia', 'Efectivo', 'Indiferente'];
 
 export const RequestModal = ({ provider, isOpen, onClose, onSuccess, defaultZona = '' }: RequestModalProps) => {
   const [zona, setZona] = useState(defaultZona);
@@ -29,7 +29,7 @@ export const RequestModal = ({ provider, isOpen, onClose, onSuccess, defaultZona
   const [descripcion, setDescripcion] = useState('');
   const [direccion, setDireccion] = useState('');
   const [referencias, setReferencias] = useState('');
-  const [contactoPreferido, setContactoPreferido] = useState<ContactoOption>('Email');
+  const [metodoPago, setMetodoPago] = useState<MetodoPagoOption>('Indiferente');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -59,7 +59,8 @@ export const RequestModal = ({ provider, isOpen, onClose, onSuccess, defaultZona
 
     if (!zona) validationErrors.zona = 'Seleccioná una zona';
     if (!urgencia) validationErrors.urgencia = 'Seleccioná la urgencia';
-    if (!contactoPreferido) validationErrors.contacto = 'Seleccioná un método de contacto';
+    if (!direccion || direccion.trim() === '') validationErrors.direccion = 'La dirección es obligatoria';
+    if (!metodoPago) validationErrors.metodoPago = 'Seleccioná un método de pago';
 
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
@@ -89,7 +90,7 @@ export const RequestModal = ({ provider, isOpen, onClose, onSuccess, defaultZona
       descripcion,
       direccion,
       referencias,
-      contactoPreferido,
+      metodoPago,
       estado: 'Pendiente' as const,
       fecha: new Date().toISOString(),
       userEmail: user.email,
@@ -104,7 +105,7 @@ export const RequestModal = ({ provider, isOpen, onClose, onSuccess, defaultZona
     setDescripcion('');
     setDireccion('');
     setReferencias('');
-    setContactoPreferido('Email');
+    setMetodoPago('Indiferente');
     
     onSuccess();
     onClose();
@@ -172,7 +173,7 @@ export const RequestModal = ({ provider, isOpen, onClose, onSuccess, defaultZona
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label htmlFor="zona" className="block text-sm font-semibold text-gray-700 mb-2">
-                📍 Zona del servicio <span className="text-red-500">*</span>
+                Zona del servicio <span className="text-red-500">*</span>
               </label>
               <select
                 id="zona"
@@ -193,7 +194,7 @@ export const RequestModal = ({ provider, isOpen, onClose, onSuccess, defaultZona
 
             <div>
               <label htmlFor="urgencia" className="block text-sm font-semibold text-gray-700 mb-2">
-                ⚡ Urgencia <span className="text-red-500">*</span>
+                Urgencia <span className="text-red-500">*</span>
               </label>
               <select
                 id="urgencia"
@@ -213,7 +214,7 @@ export const RequestModal = ({ provider, isOpen, onClose, onSuccess, defaultZona
 
             <div>
               <label htmlFor="descripcion" className="block text-sm font-semibold text-gray-700 mb-2">
-                📝 Descripción del problema (opcional)
+                Descripción del problema (opcional)
               </label>
               <textarea
                 id="descripcion"
@@ -228,7 +229,7 @@ export const RequestModal = ({ provider, isOpen, onClose, onSuccess, defaultZona
 
             <div>
               <label htmlFor="direccion" className="block text-sm font-semibold text-gray-700 mb-2">
-                🏠 Dirección (opcional)
+                Dirección <span className="text-red-500">*</span>
               </label>
               <input
                 id="direccion"
@@ -236,17 +237,17 @@ export const RequestModal = ({ provider, isOpen, onClose, onSuccess, defaultZona
                 value={direccion}
                 onChange={(e) => setDireccion(e.target.value)}
                 disabled={isLoading}
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-gray-50 hover:bg-white disabled:opacity-50"
+                className={`w-full px-4 py-3 border-2 ${
+                  errors.direccion ? 'border-red-300' : 'border-gray-200'
+                } rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-gray-50 hover:bg-white disabled:opacity-50`}
                 placeholder="Ej: Av. Santa Fe 1234, Piso 5, Depto B"
               />
-              <p className="mt-1.5 text-xs text-gray-500">
-                💡 La dirección exacta es opcional. Podés coordinarla luego con el prestador.
-              </p>
+              {errors.direccion && <p className="mt-1 text-sm text-red-600">{errors.direccion}</p>}
             </div>
 
             <div>
               <label htmlFor="referencias" className="block text-sm font-semibold text-gray-700 mb-2">
-                📍 Referencias adicionales (opcional)
+                Referencias adicionales (opcional)
               </label>
               <textarea
                 id="referencias"
@@ -261,17 +262,17 @@ export const RequestModal = ({ provider, isOpen, onClose, onSuccess, defaultZona
 
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-3">
-                📞 Contacto preferido <span className="text-red-500">*</span>
+                Método de pago <span className="text-red-500">*</span>
               </label>
-              <div className="grid grid-cols-2 gap-3">
-                {CONTACTO_OPTIONS.map(opt => (
+              <div className="grid grid-cols-3 gap-3">
+                {METODO_PAGO_OPTIONS.map(opt => (
                   <button
                     key={opt}
                     type="button"
-                    onClick={() => setContactoPreferido(opt)}
+                    onClick={() => setMetodoPago(opt)}
                     disabled={isLoading}
                     className={`py-3 px-4 rounded-xl border-2 transition-all text-sm font-medium ${
-                      contactoPreferido === opt
+                      metodoPago === opt
                         ? 'border-blue-600 bg-blue-50 text-blue-700'
                         : 'border-gray-300 bg-white text-gray-700 hover:border-blue-400'
                     } disabled:opacity-50`}
@@ -280,7 +281,7 @@ export const RequestModal = ({ provider, isOpen, onClose, onSuccess, defaultZona
                   </button>
                 ))}
               </div>
-              {errors.contacto && <p className="mt-1 text-sm text-red-600">{errors.contacto}</p>}
+              {errors.metodoPago && <p className="mt-1 text-sm text-red-600">{errors.metodoPago}</p>}
             </div>
 
             {/* Buttons */}

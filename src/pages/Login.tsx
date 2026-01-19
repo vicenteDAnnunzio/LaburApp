@@ -70,7 +70,7 @@ export const Login = () => {
     await new Promise(resolve => setTimeout(resolve, 800));
 
     if (login(loginEmail, loginPassword)) {
-      navigate('/');
+      navigate('/home');
     } else {
       setError('Email o contraseña incorrectos');
       setIsLoading(false);
@@ -145,7 +145,7 @@ export const Login = () => {
       : undefined;
 
     if (register(registerName, registerEmail, registerPassword, registerRole, providerProfile)) {
-      navigate('/');
+      navigate('/home');
     } else {
       setError('Error al crear la cuenta');
       setIsLoading(false);

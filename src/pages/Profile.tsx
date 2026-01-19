@@ -230,7 +230,7 @@ export const Profile = () => {
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Mi cuenta</h1>
           <button
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/home')}
             className="flex items-center gap-2 px-4 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-colors shadow-md"
           >
             <ArrowLeft className="w-5 h-5" />

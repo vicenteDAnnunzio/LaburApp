@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FileText, Clock, CheckCircle2, XCircle, Wrench, MapPin, Calendar, Phone, Mail, ArrowLeft, X, AlertTriangle } from 'lucide-react';
+import { FileText, Clock, CheckCircle2, XCircle, Wrench, MapPin, Calendar, DollarSign, ArrowLeft, X, AlertTriangle } from 'lucide-react';
 import { getUserRequests, updateRequestStatus } from '../lib/requests';
 import { getUser } from '../lib/auth';
+import { Header } from '../components/Header';
 import type { ServiceRequest } from '../types/request';
 
 export const Solicitudes = () => {
@@ -13,12 +14,17 @@ export const Solicitudes = () => {
   const [requestToCancel, setRequestToCancel] = useState<string | null>(null);
 
   const loadRequests = () => {
-    const user = getUser();
-    if (user) {
-      const userRequests = getUserRequests(user.email);
-      // Ordenar de más nueva a más vieja
-      const sortedRequests = userRequests.sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
-      setRequests(sortedRequests);
+    try {
+      const user = getUser();
+      if (user) {
+        const userRequests = getUserRequests(user.email);
+        // Ordenar de más nueva a más vieja
+        const sortedRequests = userRequests.sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
+        setRequests(sortedRequests);
+      }
+    } catch (error) {
+      console.error('Error loading requests:', error);
+      setRequests([]);
     }
   };
 
@@ -89,6 +95,7 @@ export const Solicitudes = () => {
 
   return (
     <div className="min-h-screen bg-gray-200">
+      <Header />
       {/* Cancel Confirmation Modal */}
       {showCancelModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
@@ -137,7 +144,7 @@ export const Solicitudes = () => {
               </div>
             </div>
             <button
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/home')}
               className="flex items-center gap-2 px-4 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-colors shadow-md"
             >
               <ArrowLeft className="w-5 h-5" />
@@ -215,12 +222,8 @@ export const Solicitudes = () => {
                     <span><strong>Solicitado:</strong> {formatDate(request.fecha)}</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-gray-700">
-                    {request.contactoPreferido === 'Email' ? (
-                      <Mail className="w-4 h-4 text-gray-500" />
-                    ) : (
-                      <Phone className="w-4 h-4 text-gray-500" />
-                    )}
-                    <span><strong>Contacto:</strong> {request.contactoPreferido}</span>
+                    <DollarSign className="w-4 h-4 text-gray-500" />
+                    <span><strong>Método de pago:</strong> {request.metodoPago || 'No especificado'}</span>
                   </div>
                 </div>
 
@@ -252,12 +255,12 @@ export const Solicitudes = () => {
                   <div className="flex-1">
                     {request.estado === 'Pendiente' && (
                       <p className="text-xs text-gray-500">
-                        ⏳ El prestador recibirá tu solicitud y se contactará por {request.contactoPreferido.toLowerCase()} dentro de 24 hs.
+                        El prestador recibirá tu solicitud y se contactará dentro de 24 hs.
                       </p>
                     )}
                     {(request.estado === 'Aceptada' || request.estado === 'Completada') && (
                       <p className="text-xs text-green-700 bg-green-50 rounded px-2 py-1 inline-block">
-                        ✅ Servicio {request.estado === 'Completada' ? 'completado' : 'aceptado'}. El prestador se pondrá en contacto pronto.
+                        Servicio {request.estado === 'Completada' ? 'completado' : 'aceptado'}. El prestador se pondrá en contacto pronto.
                       </p>
                     )}
                     {request.estado === 'Cancelada' && (

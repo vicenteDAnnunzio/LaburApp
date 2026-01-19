@@ -7,9 +7,9 @@ export interface ServiceRequest {
   zona: string;
   urgencia: UrgenciaOption;
   descripcion?: string;
-  direccion?: string;
+  direccion: string;
   referencias?: string;
-  contactoPreferido: 'Email' | 'Teléfono';
+  metodoPago: MetodoPagoOption;
   estado: 'Pendiente' | 'Aceptada' | 'Cancelada' | 'Rechazada' | 'Completada';
   fecha: string;
   userEmail: string;
@@ -20,5 +20,5 @@ export type UrgenciaOption =
   | 'Entre 24 y 48 hs' 
   | 'Entre 48 y 72 hs' 
   | 'Esta semana';
-export type ContactoOption = 'Email' | 'Teléfono';
+export type MetodoPagoOption = 'Transferencia' | 'Efectivo' | 'Indiferente';
 export type EstadoRequest = 'Pendiente' | 'Aceptada' | 'Cancelada' | 'Rechazada' | 'Completada';

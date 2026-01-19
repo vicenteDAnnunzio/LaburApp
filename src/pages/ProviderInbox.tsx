@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Inbox, Clock, CheckCircle2, XCircle, Wrench, MapPin, Calendar, Phone, Mail, ArrowLeft, MessageCircle, User } from 'lucide-react';
+import { Inbox, Clock, CheckCircle2, XCircle, Wrench, MapPin, Calendar, DollarSign, ArrowLeft, MessageCircle, User } from 'lucide-react';
 import { getProviderRequests, updateRequestStatus } from '../lib/requests';
 import { getUser } from '../lib/auth';
+import { Header } from '../components/Header';
 import type { ServiceRequest } from '../types/request';
 
 export const ProviderInbox = () => {
@@ -26,7 +27,7 @@ export const ProviderInbox = () => {
   useEffect(() => {
     const user = getUser();
     if (!user || user.role !== 'provider') {
-      navigate('/');
+      navigate('/home');
       return;
     }
     loadRequests();
@@ -90,6 +91,7 @@ export const ProviderInbox = () => {
 
   return (
     <div className="min-h-screen bg-gray-200">
+      <Header />
       {/* Message Modal */}
       {showMessageModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
@@ -127,7 +129,7 @@ export const ProviderInbox = () => {
               </div>
             </div>
             <button
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/home')}
               className="flex items-center gap-2 px-4 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-colors shadow-md"
             >
               <ArrowLeft className="w-5 h-5" />
@@ -208,12 +210,8 @@ export const ProviderInbox = () => {
                     <span><strong>Recibido:</strong> {formatDate(request.fecha)}</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-gray-700">
-                    {request.contactoPreferido === 'Email' ? (
-                      <Mail className="w-4 h-4 text-gray-500" />
-                    ) : (
-                      <Phone className="w-4 h-4 text-gray-500" />
-                    )}
-                    <span><strong>Contacto:</strong> {request.contactoPreferido}</span>
+                    <DollarSign className="w-4 h-4 text-gray-500" />
+                    <span><strong>Método de pago:</strong> {request.metodoPago || 'No especificado'}</span>
                   </div>
                 </div>
 
@@ -274,7 +272,7 @@ export const ProviderInbox = () => {
                 {request.estado === 'Aceptada' && (
                   <div className="mt-4 pt-4 border-t border-gray-100">
                     <p className="text-xs text-green-700 bg-green-50 rounded px-3 py-2 inline-block">
-                      ✅ Solicitud aceptada. Contactá al cliente por {request.contactoPreferido.toLowerCase()}.
+                      Solicitud aceptada. Contactá al cliente.
                     </p>
                   </div>
                 )}

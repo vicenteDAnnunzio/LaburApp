@@ -36,25 +36,25 @@ export const SearchSection = ({
   };
 
   return (
-    <div className="relative bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 overflow-hidden">
+    <div className="relative bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 overflow-hidden pb-0">
       {/* Background decorative elements */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-20 left-10 w-72 h-72 bg-white rounded-full blur-3xl"></div>
         <div className="absolute bottom-20 right-10 w-96 h-96 bg-white rounded-full blur-3xl"></div>
       </div>
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-16">
         {/* Hero Section */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-8">
           <h2 className="text-5xl font-bold text-white mb-4">
             Buscá el servicio que necesitás
           </h2>
-          <p className="text-xl text-blue-100 mb-8">
+          <p className="text-xl text-blue-100 mb-6">
             Profesionales de confianza cerca tuyo
           </p>
           
           {/* Quick Stats */}
-          <div className="flex justify-center gap-8 mb-8">
+          <div className="flex justify-center gap-8 mb-6">
             <div className="text-center">
               <div className="text-3xl font-bold text-white">150+</div>
               <div className="text-sm text-blue-200">Profesionales</div>
@@ -71,7 +71,7 @@ export const SearchSection = ({
         </div>
 
         {/* Search Card */}
-        <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-2xl border border-gray-100 p-8 mb-12">
+        <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-2xl border border-gray-100 p-8 mb-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div>
               <label htmlFor="zona" className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
