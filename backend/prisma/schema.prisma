@@ -1,0 +1,94 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ===== ENUMS =====
+
+enum Role {
+  CLIENT
+  PROVIDER
+}
+
+enum Urgency {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum RequestStatus {
+  PENDING
+  ACCEPTED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+// ===== MODELS =====
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  phone     String?
+  role      Role
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  providerProfile ProviderProfile?
+  serviceRequests ServiceRequest[]
+
+  @@map("users")
+}
+
+model ProviderProfile {
+  id            String   @id @default(uuid())
+  userId        String   @unique
+  businessName  String
+  serviceType   String
+  description   String?
+  location      String
+  availability  String?
+  rating        Float    @default(0)
+  reviewCount   Int      @default(0)
+  isVerified    Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  user              User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  receivedRequests  ServiceRequest[] @relation("ProviderRequests")
+
+  @@map("provider_profiles")
+}
+
+model ServiceRequest {
+  id          String        @id @default(uuid())
+  clientId    String
+  providerId  String?
+  title       String
+  description String
+  location    String
+  urgency     Urgency       @default(MEDIUM)
+  status      RequestStatus @default(PENDING)
+  budget      Float?
+  scheduledAt DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  // Relations
+  client   User             @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  provider ProviderProfile? @relation("ProviderRequests", fields: [providerId], references: [id], onDelete: SetNull)
+
+  @@map("service_requests")
+}
