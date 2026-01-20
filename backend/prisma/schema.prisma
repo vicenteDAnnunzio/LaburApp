@@ -34,15 +34,14 @@ enum RequestStatus {
 // ===== MODELS =====
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String
-  name      String
-  phone     String?
-  role      Role
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  phone        String?
+  role         Role
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   // Relations
   providerProfile ProviderProfile?
@@ -52,22 +51,18 @@ model User {
 }
 
 model ProviderProfile {
-  id            String   @id @default(uuid())
-  userId        String   @unique
-  businessName  String
-  serviceType   String
-  description   String?
-  location      String
-  availability  String?
-  rating        Float    @default(0)
-  reviewCount   Int      @default(0)
-  isVerified    Boolean  @default(false)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  userId      String   @id
+  zona        String
+  servicios   String[]
+  experiencia Int
+  descripcion String?
+  telefono    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   // Relations
-  user              User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  receivedRequests  ServiceRequest[] @relation("ProviderRequests")
+  user             User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  receivedRequests ServiceRequest[] @relation("ProviderRequests")
 
   @@map("provider_profiles")
 }
@@ -88,7 +83,7 @@ model ServiceRequest {
 
   // Relations
   client   User             @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  provider ProviderProfile? @relation("ProviderRequests", fields: [providerId], references: [id], onDelete: SetNull)
+  provider ProviderProfile? @relation("ProviderRequests", fields: [providerId], references: [userId], onDelete: SetNull)
 
   @@map("service_requests")
 }

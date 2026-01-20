@@ -1,8 +1,18 @@
 import { Role } from '@prisma/client';
+import { Request } from 'express';
 
 /**
  * Type definitions for the ServiceFinder API
  */
+
+// Auth Request con usuario autenticado
+export interface AuthRequest extends Request {
+  user?: {
+    id: string;
+    email: string;
+    role: Role;
+  };
+}
 
 // Auth
 export interface RegisterDto {
