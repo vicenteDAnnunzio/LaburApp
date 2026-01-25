@@ -26,6 +26,7 @@ enum Urgency {
 enum RequestStatus {
   PENDING
   ACCEPTED
+  REJECTED
   IN_PROGRESS
   COMPLETED
   CANCELLED

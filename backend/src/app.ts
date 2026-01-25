@@ -4,11 +4,11 @@ import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
 import { config } from './config/env';
 import authRoutes from './routes/auth.routes';
+import providersRoutes from './routes/providers.routes';
+import requestsRoutes from './routes/requests.routes';
 
 // TODO PHASE 2: Import remaining routes
 // import userRoutes from './routes/user.routes';
-// import providerRoutes from './routes/provider.routes';
-// import requestRoutes from './routes/request.routes';
 
 const app: Application = express();
 
@@ -29,11 +29,11 @@ app.get('/health', (req, res) => {
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/providers', providersRoutes);
+app.use('/api/requests', requestsRoutes);
 
 // TODO PHASE 2: Register remaining routes
 // app.use('/api/users', userRoutes);
-// app.use('/api/providers', providerRoutes);
-// app.use('/api/requests', requestRoutes);
 
 // 404 handler
 app.use((req, res) => {
