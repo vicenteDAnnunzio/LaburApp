@@ -74,7 +74,7 @@ export const UserMenu = () => {
           <button
             onClick={() => {
               setIsOpen(false);
-              navigate('/solicitudes');
+              navigate(isProvider ? '/inbox' : '/solicitudes');
             }}
             className="w-full px-5 py-3 text-left flex items-center gap-3 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 transition-all duration-200 text-gray-700 hover:text-blue-700 group"
           >

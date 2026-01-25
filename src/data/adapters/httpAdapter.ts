@@ -25,55 +25,87 @@ import { setSession, setAuthToken, clearSession, setUserData } from '../../lib/s
  * Adaptador HTTP para backend real
  * Endpoints esperados:
  * 
- * POST   /auth/register
- * POST   /auth/login
+ * POST   /api/auth/register
+ * POST   /api/auth/login
  * Logout: solo local (sin endpoint)
- * GET    /me
+ * GET    /api/auth/me
  * 
- * PUT    /me
+ * PUT    /api/auth/me
  * 
- * GET    /providers?zona=X&servicio=Y
+ * GET    /api/providers?zona=X&servicio=Y
  * 
- * POST   /requests
- * GET    /requests?as=client
- * GET    /requests?as=provider
- * PATCH  /requests/:id  { action: "accept" | "reject" | "cancel" }
+ * POST   /api/requests
+ * GET    /api/requests?as=client
+ * GET    /api/requests?as=provider
+ * PATCH  /api/requests/:id  { action: "accept" | "reject" | "cancel" }
  */
 export const httpAdapter: DataAdapter = {
   async register(data: RegisterData): Promise<AuthResponse> {
     try {
-      const response = await post<AuthResponse>('/auth/register', data, { auth: false });
+      const response = await post<{ token: string; user: any }>('/api/auth/register', data, { auth: false });
       
-      if (response.success && response.token && response.user) {
+      // El backend retorna { token, user }, necesitamos adaptarlo a AuthResponse
+      if (response.token && response.user) {
+        // Normalizar role de mayúsculas a minúsculas
+        const normalizedUser: User = {
+          ...response.user,
+          role: response.user.role.toLowerCase() as 'client' | 'provider'
+        };
+        
         setAuthToken(response.token);
-        setSession(response.user.email);
-        setUserData(response.user);
+        setSession(normalizedUser.email);
+        setUserData(normalizedUser);
+        
+        return {
+          success: true,
+          token: response.token,
+          user: normalizedUser
+        };
       }
       
-      return response;
+      return {
+        success: false,
+        message: 'Respuesta inválida del servidor'
+      };
     } catch (error: any) {
       return {
         success: false,
-        message: error.data?.message || error.message || 'Error en el registro'
+        message: error.data?.error || error.message || 'Error en el registro'
       };
     }
   },
 
   async login(data: LoginData): Promise<AuthResponse> {
     try {
-      const response = await post<AuthResponse>('/auth/login', data, { auth: false });
+      const response = await post<{ token: string; user: any }>('/api/auth/login', data, { auth: false });
       
-      if (response.success && response.token && response.user) {
+      // El backend retorna { token, user }, necesitamos adaptarlo a AuthResponse
+      if (response.token && response.user) {
+        // Normalizar role de mayúsculas a minúsculas
+        const normalizedUser: User = {
+          ...response.user,
+          role: response.user.role.toLowerCase() as 'client' | 'provider'
+        };
+        
         setAuthToken(response.token);
-        setSession(response.user.email);
-        setUserData(response.user);
+        setSession(normalizedUser.email);
+        setUserData(normalizedUser);
+        
+        return {
+          success: true,
+          token: response.token,
+          user: normalizedUser
+        };
       }
       
-      return response;
+      return {
+        success: false,
+        message: 'Respuesta inválida del servidor'
+      };
     } catch (error: any) {
       return {
         success: false,
-        message: error.data?.message || error.message || 'Error en el login'
+        message: error.data?.error || error.message || 'Email o contraseña incorrectos'
       };
     }
   },
@@ -84,18 +116,18 @@ export const httpAdapter: DataAdapter = {
   },
 
   async getMe(): Promise<UserWithProfile> {
-    const response = await get<UserWithProfile>('/me');
+    const response = await get<UserWithProfile>('/api/auth/me');
     return response;
   },
 
   async updateMe(data: Partial<User>): Promise<User> {
-    const response = await put<User>('/me', data);
+    const response = await put<User>('/api/auth/me', data);
     setUserData(response);
     return response;
   },
 
   async updateProviderProfile(data: Partial<ProviderProfile>): Promise<ProviderProfile> {
-    const response = await put<UserWithProfile>('/me', { providerProfile: data });
+    const response = await put<UserWithProfile>('/api/auth/me', { providerProfile: data });
     return response.providerProfile!;
   },
 
@@ -110,24 +142,24 @@ export const httpAdapter: DataAdapter = {
       queryParams.append('servicio', params.servicio);
     }
     
-    const endpoint = `/providers${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    const endpoint = `/api/providers${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
     const response = await get<Provider[]>(endpoint);
     return response;
   },
 
   async createRequest(data: CreateRequestData): Promise<ServiceRequest> {
-    const response = await post<ServiceRequest>('/requests', data);
+    const response = await post<ServiceRequest>('/api/requests', data);
     return response;
   },
 
   async listRequests(filter: RequestFilter): Promise<ServiceRequest[]> {
-    const endpoint = `/requests?as=${filter}`;
+    const endpoint = `/api/requests?as=${filter}`;
     const response = await get<ServiceRequest[]>(endpoint);
     return response;
   },
 
   async updateRequest(id: string, data: UpdateRequestData): Promise<ServiceRequest> {
-    const response = await patch<ServiceRequest>(`/requests/${id}`, data);
+    const response = await patch<ServiceRequest>(`/api/requests/${id}`, data);
     return response;
   }
 };
