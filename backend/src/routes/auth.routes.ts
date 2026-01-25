@@ -5,6 +5,12 @@ import { authenticate } from '../middleware/auth.middleware';
 const router = Router();
 
 /**
+ * POST /auth/register
+ * Registrar nuevo usuario (CLIENT o PROVIDER)
+ */
+router.post('/register', (req, res) => authController.register(req, res));
+
+/**
  * POST /auth/login
  * Autenticar usuario y generar JWT
  */
