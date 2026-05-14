@@ -3,18 +3,18 @@ version: '3.8'
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: servicefinder-db
+    container_name: laburapp-db
     restart: unless-stopped
     environment:
-      POSTGRES_USER: servicefinder
+      POSTGRES_USER: laburapp
       POSTGRES_PASSWORD: dev_password_123
-      POSTGRES_DB: servicefinder_db
+      POSTGRES_DB: laburapp_db
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U servicefinder"]
+      test: ["CMD-SHELL", "pg_isready -U laburapp"]
       interval: 10s
       timeout: 5s
       retries: 5

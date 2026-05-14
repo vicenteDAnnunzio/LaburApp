@@ -18,7 +18,7 @@ export const Header = () => {
             </div>
             <div className="flex flex-col items-start">
               <h1 className="text-2xl font-bold text-gray-900">
-                ServiceFinder
+                LaburApp
               </h1>
               <p className="text-xs font-medium text-gray-500">Profesionales de confianza</p>
             </div>

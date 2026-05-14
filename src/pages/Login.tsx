@@ -187,7 +187,7 @@ export const Login = () => {
                   <Wrench className="w-6 h-6 text-white" />
                 </div>
                 <h1 className="text-2xl font-bold text-gray-900">
-                  ServiceFinder
+                  LaburApp
                 </h1>
               </div>
               <p className="text-gray-600 text-sm">Encontrá profesionales cerca tuyo</p>
@@ -273,7 +273,7 @@ export const Login = () => {
                   <Wrench className="w-6 h-6 text-white" />
                 </div>
                 <h1 className="text-2xl font-bold text-gray-900">
-                  ServiceFinder
+                  LaburApp
                 </h1>
               </div>
               <p className="text-gray-600 text-sm">Encontrá profesionales cerca tuyo</p>

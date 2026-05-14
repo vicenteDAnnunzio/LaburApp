@@ -73,6 +73,11 @@ export const UserMenu = () => {
 
           <button
             onClick={() => {
+              const user = getUserData();
+              console.log('[UserMenu] Click Mis solicitudes');
+              console.log('[UserMenu] user:', user);
+              console.log('[UserMenu] isProvider:', isProvider);
+              console.log('[UserMenu] Navegando a:', isProvider ? '/inbox' : '/solicitudes');
               setIsOpen(false);
               navigate(isProvider ? '/inbox' : '/solicitudes');
             }}

@@ -1,7 +1,7 @@
 {
-  "name": "servicefinder-backend",
+  "name": "laburapp-backend",
   "version": "1.0.0",
-  "description": "Backend API for ServiceFinder - Connect clients with service providers",
+  "description": "Backend API for LaburApp - Connect clients with service providers",
   "main": "dist/server.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
@@ -17,7 +17,7 @@
     "express",
     "prisma",
     "typescript",
-    "servicefinder"
+    "laburapp"
   ],
   "author": "",
   "license": "MIT",
@@ -46,6 +46,9 @@
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.9.3"
+  },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
   },
   "directories": {
     "doc": "docs"

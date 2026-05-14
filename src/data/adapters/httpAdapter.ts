@@ -22,6 +22,65 @@ import { get, post, put, patch } from '../../lib/httpClient';
 import { setSession, setAuthToken, clearSession, setUserData } from '../../lib/session';
 
 /**
+ * Transforma los datos del backend al formato esperado por el frontend
+ */
+function transformBackendRequest(backendRequest: any): ServiceRequest {
+  // Mapeo de estados del backend al frontend
+  const statusMap: Record<string, ServiceRequest['estado']> = {
+    'PENDING': 'Pendiente',
+    'ACCEPTED': 'Aceptada',
+    'CANCELLED': 'Cancelada',
+    'REJECTED': 'Rechazada',
+    'COMPLETED': 'Completada',
+  };
+
+  // Mapeo de urgencia del backend al frontend
+  const urgencyMap: Record<string, ServiceRequest['urgencia']> = {
+    'HIGH': 'Lo antes posible (hoy / < 24 hs)',
+    'MEDIUM': 'Entre 24 y 48 hs',
+    'LOW': 'Entre 48 y 72 hs',
+  };
+
+  return {
+    id: backendRequest.id,
+    providerId: backendRequest.providerId,
+    providerName: backendRequest.provider?.user?.name || 'Proveedor',
+    providerService: backendRequest.provider?.servicios?.[0] || 'Servicio',
+    providerZona: backendRequest.provider?.zona || backendRequest.location,
+    zona: backendRequest.location,
+    urgencia: urgencyMap[backendRequest.urgency] || 'Entre 24 y 48 hs',
+    descripcion: backendRequest.description,
+    direccion: backendRequest.location,
+    referencias: backendRequest.title,
+    metodoPago: 'Indiferente',
+    estado: statusMap[backendRequest.status] || 'Pendiente',
+    fecha: backendRequest.scheduledAt || backendRequest.createdAt,
+    userEmail: backendRequest.client?.email || '',
+  };
+}
+
+/**
+ * Transforma los datos del frontend al formato esperado por el backend
+ */
+function transformFrontendRequest(frontendData: CreateRequestData): any {
+  // Mapeo de urgencia del frontend al backend
+  const urgencyMap: Record<string, 'HIGH' | 'MEDIUM' | 'LOW'> = {
+    'Lo antes posible (hoy / < 24 hs)': 'HIGH',
+    'Entre 24 y 48 hs': 'MEDIUM',
+    'Entre 48 y 72 hs': 'LOW',
+    'Esta semana': 'LOW',
+  };
+
+  return {
+    providerId: frontendData.providerId,
+    title: frontendData.referencias || frontendData.providerService,
+    description: frontendData.descripcion || 'Sin descripción',
+    location: frontendData.direccion,
+    urgency: urgencyMap[frontendData.urgencia] || 'MEDIUM',
+  };
+}
+
+/**
  * Adaptador HTTP para backend real
  * Endpoints esperados:
  * 
@@ -116,18 +175,30 @@ export const httpAdapter: DataAdapter = {
   },
 
   async getMe(): Promise<UserWithProfile> {
-    const response = await get<UserWithProfile>('/api/auth/me');
+    const response = await get<any>('/api/auth/me');
+    // Normalizar role de mayúsculas a minúsculas
+    if (response.role) {
+      response.role = response.role.toLowerCase();
+    }
     return response;
   },
 
   async updateMe(data: Partial<User>): Promise<User> {
-    const response = await put<User>('/api/auth/me', data);
+    const response = await put<any>('/api/auth/me', data);
+    // Normalizar role de mayúsculas a minúsculas
+    if (response.role) {
+      response.role = response.role.toLowerCase();
+    }
     setUserData(response);
     return response;
   },
 
   async updateProviderProfile(data: Partial<ProviderProfile>): Promise<ProviderProfile> {
-    const response = await put<UserWithProfile>('/api/auth/me', { providerProfile: data });
+    const response = await put<any>('/api/auth/me', { providerProfile: data });
+    // Normalizar role de mayúsculas a minúsculas
+    if (response.role) {
+      response.role = response.role.toLowerCase();
+    }
     return response.providerProfile!;
   },
 
@@ -148,18 +219,19 @@ export const httpAdapter: DataAdapter = {
   },
 
   async createRequest(data: CreateRequestData): Promise<ServiceRequest> {
-    const response = await post<ServiceRequest>('/api/requests', data);
-    return response;
+    const backendData = transformFrontendRequest(data);
+    const response = await post<any>('/api/requests', backendData);
+    return transformBackendRequest(response);
   },
 
   async listRequests(filter: RequestFilter): Promise<ServiceRequest[]> {
     const endpoint = `/api/requests?as=${filter}`;
-    const response = await get<ServiceRequest[]>(endpoint);
-    return response;
+    const response = await get<any[]>(endpoint);
+    return response.map(transformBackendRequest);
   },
 
   async updateRequest(id: string, data: UpdateRequestData): Promise<ServiceRequest> {
-    const response = await patch<ServiceRequest>(`/api/requests/${id}`, data);
-    return response;
+    const response = await patch<any>(`/api/requests/${id}`, data);
+    return transformBackendRequest(response);
   }
 };

@@ -9,6 +9,7 @@ async function main() {
   // Hash passwords (bcrypt)
   const clientPassword = await bcrypt.hash('cliente123', 10);
   const providerPassword = await bcrypt.hash('vicente', 10);
+  const plomeroPassword = await bcrypt.hash('plomero123', 10);
 
   // A) Cliente Demo
   const clienteDemo = await prisma.user.upsert({
@@ -53,7 +54,86 @@ async function main() {
   });
   console.log('✅ ProviderProfile created for Vicente');
 
-  // D) ServiceRequests de prueba
+  // D) Plomeros en Palermo
+  const plomero1 = await prisma.user.upsert({
+    where: { email: 'mario.plomero@demo.com' },
+    update: {},
+    create: {
+      email: 'mario.plomero@demo.com',
+      passwordHash: plomeroPassword,
+      name: 'Mario Pérez',
+      phone: '+54 11 4567-8901',
+      role: Role.PROVIDER,
+    },
+  });
+
+  await prisma.providerProfile.upsert({
+    where: { userId: plomero1.id },
+    update: {},
+    create: {
+      userId: plomero1.id,
+      zona: 'Palermo',
+      servicios: ['Plomero', 'Destapaciones', 'Instalaciones'],
+      experiencia: 12,
+      descripcion: 'Plomero matriculado con 12 años de experiencia en Palermo. Especializado en destapaciones, reparación de pérdidas, instalación de termotanques y grifería. Servicio de emergencia 24/7. Presupuestos sin cargo.',
+      telefono: '+54 11 4567-8901',
+    },
+  });
+  console.log('✅ Plomero 1 created: mario.plomero@demo.com');
+
+  const plomero2 = await prisma.user.upsert({
+    where: { email: 'carlos.plomero@demo.com' },
+    update: {},
+    create: {
+      email: 'carlos.plomero@demo.com',
+      passwordHash: plomeroPassword,
+      name: 'Carlos Rodríguez',
+      phone: '+54 11 5678-9012',
+      role: Role.PROVIDER,
+    },
+  });
+
+  await prisma.providerProfile.upsert({
+    where: { userId: plomero2.id },
+    update: {},
+    create: {
+      userId: plomero2.id,
+      zona: 'Palermo',
+      servicios: ['Plomero', 'Gasista', 'Termotanques'],
+      experiencia: 18,
+      descripcion: 'Plomero y gasista matriculado en Palermo. 18 años de experiencia en instalaciones de gas, termotanques, calderas, y sistemas de calefacción. También plomería general y cloacas. Certificaciones y habilitaciones al día.',
+      telefono: '+54 11 5678-9012',
+    },
+  });
+  console.log('✅ Plomero 2 created: carlos.plomero@demo.com');
+
+  const plomero3 = await prisma.user.upsert({
+    where: { email: 'jorge.plomero@demo.com' },
+    update: {},
+    create: {
+      email: 'jorge.plomero@demo.com',
+      passwordHash: plomeroPassword,
+      name: 'Jorge Fernández',
+      phone: '+54 11 6789-0123',
+      role: Role.PROVIDER,
+    },
+  });
+
+  await prisma.providerProfile.upsert({
+    where: { userId: plomero3.id },
+    update: {},
+    create: {
+      userId: plomero3.id,
+      zona: 'Palermo',
+      servicios: ['Plomero', 'Reparaciones', 'Mantenimiento'],
+      experiencia: 8,
+      descripcion: 'Plomero en Palermo con 8 años de experiencia. Especializado en reparaciones urgentes, cambio de cañerías, arreglo de grifos y monocomandas, instalación de piletas y bachas. Trabajo prolijo y garantizado.',
+      telefono: '+54 11 6789-0123',
+    },
+  });
+  console.log('✅ Plomero 3 created: jorge.plomero@demo.com');
+
+  // E) ServiceRequests de prueba
   
   // Request 1: PENDING (recién creada)
   await prisma.serviceRequest.upsert({
@@ -116,6 +196,11 @@ async function main() {
   console.log('📍 Zona: CABA');
   console.log('⚡ Servicio: Electricista');
   console.log('📝 Requests: 3 (PENDING, ACCEPTED, CANCELLED)');
+  console.log('');
+  console.log('🔧 Plomeros en Palermo:');
+  console.log('   • mario.plomero@demo.com / plomero123');
+  console.log('   • carlos.plomero@demo.com / plomero123');
+  console.log('   • jorge.plomero@demo.com / plomero123');
   console.log('─────────────────────────────────────');
 }
 

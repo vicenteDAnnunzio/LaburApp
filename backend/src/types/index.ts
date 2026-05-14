@@ -2,7 +2,7 @@ import { Role } from '@prisma/client';
 import { Request } from 'express';
 
 /**
- * Type definitions for the ServiceFinder API
+ * Type definitions for the LaburApp API
  */
 
 // Auth Request con usuario autenticado

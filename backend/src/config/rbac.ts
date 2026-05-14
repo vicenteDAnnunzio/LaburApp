@@ -1,5 +1,5 @@
 /**
- * RBAC Configuration for ServiceFinder
+ * RBAC Configuration for LaburApp
  * 
  * Defines roles and their associated permissions.
  * Used by middleware to control access to endpoints.
